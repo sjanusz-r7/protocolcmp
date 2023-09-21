@@ -64,7 +64,7 @@ def single_view_main(stdscr, args):
     th, bh = single_split(W, H, th_ratio)
 
     twin = curses.newwin(th, W, 0, 0)
-    tbuf = TraceViewer(twin, smbcmp.strip_packet_no(args.filea))
+    tbuf = TraceViewer(twin, smbcmp.strip_packet_no(args.filea), args.protocols)
 
     bwin = curses.newwin(bh, W, th+1, 0)
     bbuf = BufferViewer(bwin, "")
@@ -133,13 +133,13 @@ def diff_view_main(stdscr, args):
     # h, w, y, x
     lwin = curses.newwin(th, lw, 0, 0)
     lcap, lno = smbcmp.split_packet_arg(args.filea)
-    lbuf = TraceViewer(lwin, lcap)
+    lbuf = TraceViewer(lwin, lcap, args.protocols)
     if lno:
         lbuf.select_packet_no(lno)
 
     rwin = curses.newwin(th, rw, 0, lw+1)
     rcap, rno = smbcmp.split_packet_arg(args.fileb)
-    rbuf = TraceViewer(rwin, rcap)
+    rbuf = TraceViewer(rwin, rcap, args.protocols)
     if rno:
         rbuf.select_packet_no(rno)
 
@@ -411,16 +411,16 @@ class TraceViewer(object):
     win -- curses windows object to display on
     cap -- name of the capture file
     """
-    def __init__(self, win, cap):
+    def __init__(self, win, cap, protocols):
         self.buf = BufferViewer(win, '')
         self.buf.set_rxhl([
             (r'''(Error)''', curses.color_pair(1) | curses.A_BOLD),
         ])
-        self.set_cap(cap)
+        self.set_cap(cap, protocols)
 
-    def set_cap(self, cap):
+    def set_cap(self, cap, protocols):
         self.cap = cap
-        self.pkts = smbcmp.smb_summaries(cap)
+        self.pkts = smbcmp.smb_summaries(cap, protocols)
         self.nos = sorted(self.pkts.keys())
         lines = []
         for no in self.nos:

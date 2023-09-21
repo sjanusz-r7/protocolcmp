@@ -211,20 +211,21 @@ def smb_diff(a, b, gui=False):
     return "\n".join(lines)
 
 
-@functools.lru_cache(maxsize=128)
-def smb_summaries(pcap):
+@functools.lru_cache(maxsize=256)
+def smb_summaries(pcap, protocols):
     cmd = tshark(*tshark_keys_opts())
-    cmd += ['-r', pcap, TSHARK_FILTER_FLAG, '!browser && (smb||smb2)']
+    #import pdb; pdb.set_trace()
+    cmd += ['-r', pcap, TSHARK_FILTER_FLAG, '!browser && ' + protocols.lower()]
     out = subprocess.check_output(cmd).decode('utf-8')
     pkts = {}
     for line in out.split('\n'):
-        m = re.match(r'''\s*(\d+).+?SMB2?\s*\d+\s*(.+)''', line)
+        m = re.match(r'''\s*(\d+).+?''' + protocols + '''\s*\d+\s*(.+)''', line)
         if m:
             pkts[int(m.group(1))] = m.group(2)
     return pkts
 
 
-@functools.lru_cache(maxsize=128)
+@functools.lru_cache(maxsize=256)
 def smb_packet(pcap, no, pdml=False):
     """Show the content of a packet
 
@@ -642,6 +643,7 @@ def parse_args(gui=False):
                     session id & key pair given in hex (as
                     SESSID,KEY). This option can be used multiple
                     times to pass multiple keys.''')
+    ap.add_argument('-p', '--protocols', help='''What protocols to compare. e.g. --protocols pgsql''')
 
     if gui:
         # GUI can take 0 or 2 files, no single view

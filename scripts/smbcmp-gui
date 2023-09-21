@@ -91,10 +91,10 @@ class TracePanel(wx.Panel):
         self.search_bar.AutoComplete(choices=self.data)
         self.buffer.SetSelection(0)
 
-    def set_data(self, file_path):
+    def set_data(self, file_path, protocols):
         """ Fill the Panel with smb summaries """
         self.cap = file_path
-        pkts = smbcmp.smb_summaries(self.cap)
+        pkts = smbcmp.smb_summaries(self.cap, protocols)
         self.nos = sorted(pkts.keys())
         self.data = [pkts[x] for x in self.nos]
         self._reset_items()
@@ -217,9 +217,9 @@ class MainFrame(wx.Frame):
             source=self.rpanel.search_bar)
 
         if ARGS.filea:
-            self.lpanel.set_data(ARGS.filea)
+            self.lpanel.set_data(ARGS.filea, ARGS.protocols)
         if ARGS.fileb:
-            self.rpanel.set_data(ARGS.fileb)
+            self.rpanel.set_data(ARGS.fileb, ARGS.protocols)
 
         if ARGS.mode == 'text':
             self.bbuffer.diff_method = DIFFLIB
