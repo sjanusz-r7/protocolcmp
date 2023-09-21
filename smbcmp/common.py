@@ -214,12 +214,11 @@ def smb_diff(a, b, gui=False):
 @functools.lru_cache(maxsize=256)
 def smb_summaries(pcap, protocols):
     cmd = tshark(*tshark_keys_opts())
-    #import pdb; pdb.set_trace()
-    cmd += ['-r', pcap, TSHARK_FILTER_FLAG, '!browser && ' + protocols.lower()]
+    cmd += ['-r', pcap, TSHARK_FILTER_FLAG, protocols.lower()]
     out = subprocess.check_output(cmd).decode('utf-8')
     pkts = {}
     for line in out.split('\n'):
-        m = re.match(r'''\s*(\d+).+?''' + protocols + '''\s*\d+\s*(.+)''', line)
+        m = re.match(r'''\s*(\d+).+?(?:''' + protocols + ''')\s*\d+\s*(.+)''', line)
         if m:
             pkts[int(m.group(1))] = m.group(2)
     return pkts

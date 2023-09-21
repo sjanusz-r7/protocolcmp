@@ -297,7 +297,10 @@ class BufferViewer(object):
             def write(s, a, x=0):
                 if self.hl and self.cursor - self.top == nr:
                     a = a|curses.A_REVERSE
-                self.win.addstr(nr, x, s, a)
+                try:
+                    self.win.addstr(nr, x, s, a)
+                except curses.error:
+                    pass
 
             if self.diff:
                 if line[0] == '-':
@@ -342,7 +345,10 @@ class BufferViewerCSIColors(BufferViewer):
                 a = a | curses.A_REVERSE
             if x + len(s) >= self.width():
                 s = s[:self.width()-x-1]
-            self.win.addstr(y, x, s, a)
+            try:
+                self.win.addstr(y, x, s, a)
+            except curses.error:
+                pass
 
         for tok in re.finditer(rx, text):
             typ = tok.lastindex
